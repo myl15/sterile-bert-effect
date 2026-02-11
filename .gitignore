@@ -1,6 +1,6 @@
 # Data and outputs (large, generated at runtime)
-data/
-outputs/
+/data/
+/outputs/
 
 # Python
 __pycache__/
