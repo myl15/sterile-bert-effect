@@ -22,6 +22,7 @@ dependencies = [
     "evaluate",
     "seqeval",
     "pandas",
+    "conllu",
 ]
 
 [tool.uv.sources]

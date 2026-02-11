@@ -7,6 +7,10 @@
 # ============================================================================
 set -euo pipefail
 
+# PREREQUISITE: Run the following on the login node first (requires internet):
+#   bash scripts/00_download_cache.sh
+#   bash slurm/setup_env.sh
+
 echo "Submitting pipeline..."
 
 # Step 1-4: Data preparation (CPU)

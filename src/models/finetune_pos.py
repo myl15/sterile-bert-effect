@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from datasets import load_dataset
+from datasets import load_from_disk
 from transformers import (
     BertConfig,
     BertForTokenClassification,
@@ -24,11 +24,10 @@ def get_upos_labels(dataset):
 
 
 def load_ud_dataset(treebank: str, split: str):
-    """Load a Universal Dependencies treebank split."""
-    return load_dataset(
-        "universal-dependencies/universal_dependencies",
-        treebank, split=split, trust_remote_code=True,
-    )
+    """Load a Universal Dependencies treebank split from the local disk cache."""
+    project_root = Path(__file__).resolve().parent.parent.parent
+    ud_path = project_root / "data" / "ud_datasets" / treebank
+    return load_from_disk(str(ud_path))[split]
 
 
 def tokenize_and_align_labels(examples, tokenizer, max_seq_length=256):

@@ -19,13 +19,16 @@ Both models are fine-tuned on English POS tagging (Universal Dependencies) and e
 
 ```
 ├── configs/base_config.yaml       # All hyperparameters and paths
+├── pyproject.toml                 # Dependencies (managed by uv)
 ├── run_pipeline.py                # Run full pipeline locally (steps 1-8)
+├── scripts/
+│   └── 00_download_cache.sh      # Login-node: download Wikipedia + UD treebanks
 ├── slurm/                         # SLURM scripts for cluster execution
-│   ├── setup_env.sh               # One-time environment setup
-│   ├── 01_data_prep.sh            # Steps 1-4 (CPU)
-│   ├── 02_pretrain.sh             # Step 5 (GPU)
-│   ├── 03_finetune_eval.sh        # Steps 6-8 (GPU)
-│   └── run_all.sh                 # Submit all jobs with dependencies
+│   ├── setup_env.sh               # One-time environment setup (creates .venv)
+│   ├── 01_data_prep.sh            # Steps 2-4 (CPU job)
+│   ├── 02_pretrain.sh             # Step 5 (GPU job)
+│   ├── 03_finetune_eval.sh        # Steps 6-8 (GPU job)
+│   └── run_all.sh                 # Submit all jobs with dependency chaining
 ├── src/
 │   ├── data/
 │   │   ├── download_wiki.py       # Step 1: Download Wikipedia subsets
@@ -46,17 +49,28 @@ Both models are fine-tuned on English POS tagging (Universal Dependencies) and e
 
 ## Setup
 
-```bash
-# Option A: conda (may require manual PyTorch install if download fails)
-conda env create -f environment.yml
-conda activate sterile-lang
+Dependencies are managed with [uv](https://docs.astral.sh/uv/). Install it if you don't have it:
 
-# Option B: manual install
-conda create -n sterile-lang python=3.11 -y
-conda activate sterile-lang
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-conda install numpy scipy scikit-learn matplotlib seaborn pyyaml tqdm tensorboard pytest -y
-pip install "transformers>=4.40" "datasets>=3.0" "tokenizers>=0.19" "accelerate>=0.30" evaluate seqeval pandas
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Then create the virtual environment and install all dependencies (including PyTorch with CUDA 12.4):
+
+```bash
+uv sync
+```
+
+Or run the one-time setup script which handles this automatically:
+
+```bash
+bash slurm/setup_env.sh
+```
+
+To activate the environment manually:
+
+```bash
+source .venv/bin/activate
 ```
 
 ## Running
@@ -77,12 +91,31 @@ python src/models/pretrain_mlm.py --config configs/base_config.yaml --variant co
 
 ### SLURM (supercomputer)
 
-Edit the `MODULE_CONDA`, `MODULE_CUDA`, and `--partition` values in the SLURM scripts to match your cluster, then:
+Compute nodes have no internet access, so all data must be downloaded on the login node first. The full workflow is three steps:
+
+**1. One-time environment setup** (login node, run once):
 
 ```bash
-bash slurm/setup_env.sh    # one-time, run interactively
-bash slurm/run_all.sh       # submits 3 jobs with dependency chaining
+bash slurm/setup_env.sh
 ```
+
+**2. Download all data** (login node, requires internet):
+
+```bash
+bash scripts/00_download_cache.sh
+```
+
+This downloads English and French Wikipedia subsets and fetches the Universal Dependencies treebanks (EN-EWT and FR-GSD), saving everything locally under `data/`.
+
+**3. Submit the compute jobs** (from the project root):
+
+```bash
+bash slurm/run_all.sh
+```
+
+This submits three jobs with dependency chaining — each waits for the previous one to complete successfully before starting.
+
+Before submitting, edit `MODULE_CUDA` and `--qos` / `--partition` in the SLURM scripts to match your cluster.
 
 ### Monitoring
 

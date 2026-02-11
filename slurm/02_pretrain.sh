@@ -13,6 +13,8 @@
 # ============================================================================
 set -euo pipefail
 
+export TRANSFORMERS_OFFLINE=1
+
 # --- Customize these for your cluster ---
 MODULE_CUDA="cuda/12.4"
 # ----------------------------------------

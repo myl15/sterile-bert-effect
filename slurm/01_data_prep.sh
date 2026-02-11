@@ -6,19 +6,19 @@
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
 # ============================================================================
-# Steps 1-4: Download Wikipedia, sterilize, train tokenizers, prepare MLM data
+# Steps 2-4: Sterilize text, train tokenizers, prepare MLM data
+# (Step 1 Wikipedia download runs on the login node via scripts/00_download_cache.sh)
 # No GPU needed.
 # ============================================================================
 set -euo pipefail
+
+export TRANSFORMERS_OFFLINE=1
 
 source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
 
 cd "$SLURM_SUBMIT_DIR"
 
 echo "$(date) | Starting data preparation pipeline"
-
-echo "=== Step 1: Download Wikipedia ==="
-python src/data/download_wiki.py --config configs/base_config.yaml
 
 echo "=== Step 2: Sterilize text ==="
 python src/data/sterilize.py --config configs/base_config.yaml
