@@ -1,0 +1,36 @@
+# Data and outputs (large, generated at runtime)
+data/
+outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environments
+.env
+*.env
+.conda/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# SLURM logs (keep directory via .gitkeep)
+slurm/logs/*.out
+
+# Claude Code
+.claude/

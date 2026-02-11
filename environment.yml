@@ -1,0 +1,30 @@
+name: sterile-lang
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pytorch>=2.4
+  - pytorch-cuda=12.4
+  - torchaudio
+  - torchvision
+  - numpy
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - pyyaml
+  - tqdm
+  - tensorboard
+  - pytest
+  - pip:
+    - transformers>=4.40
+    - datasets>=3.0
+    - tokenizers>=0.19
+    - accelerate>=0.30
+    - evaluate
+    - seqeval
+    - pandas
