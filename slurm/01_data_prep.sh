@@ -12,6 +12,12 @@
 # ============================================================================
 set -euo pipefail
 
+# --- Initialize the module system ---
+for init_script in /etc/profile.d/modules.sh /etc/profile.d/lmod.sh \
+    /usr/share/lmod/lmod/init/bash /usr/share/modules/init/bash; do
+    [ -f "$init_script" ] && { source "$init_script"; break; }
+done
+
 # --- Customize these for your cluster ---
 MODULE_CONDA="miniconda3"
 # ----------------------------------------

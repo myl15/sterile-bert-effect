@@ -5,6 +5,21 @@
 # ============================================================================
 set -euo pipefail
 
+# --- Initialize the module system (try common locations) ---
+if ! command -v module &> /dev/null; then
+    for init_script in \
+        /etc/profile.d/modules.sh \
+        /etc/profile.d/lmod.sh \
+        /usr/share/lmod/lmod/init/bash \
+        /usr/share/modules/init/bash \
+        /opt/modules/init/bash; do
+        if [ -f "$init_script" ]; then
+            source "$init_script"
+            break
+        fi
+    done
+fi
+
 # --- Customize these for your cluster ---
 MODULE_CONDA="miniconda3"   # or: anaconda, anaconda3, miniforge, etc.
 MODULE_CUDA="cuda/12.4"     # or: cuda/12.1, cuda/11.8, etc.
