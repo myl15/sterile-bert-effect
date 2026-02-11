@@ -20,28 +20,20 @@ if ! command -v module &> /dev/null; then
     done
 fi
 
-# --- Customize these for your cluster ---
-MODULE_CONDA="miniconda3"   # or: anaconda, anaconda3, miniforge, etc.
-MODULE_CUDA="cuda/12.4"     # or: cuda/12.1, cuda/11.8, etc.
-# ----------------------------------------
+# --- Install uv if not already available ---
+if ! command -v uv &> /dev/null; then
+    echo "=== Installing uv ==="
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    # Add uv to PATH for this session
+    export PATH="$HOME/.local/bin:$PATH"
+fi
 
-echo "=== Loading modules ==="
-module purge
-module load "$MODULE_CONDA"
-module load "$MODULE_CUDA"
+echo "=== uv version: $(uv --version) ==="
 
-echo "=== Creating conda environment ==="
-conda env create -f environment.yml || {
-    echo "environment.yml failed, installing manually..."
-    conda create -n sterile-lang python=3.11 -y
-    conda activate sterile-lang
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-    conda install numpy scipy scikit-learn matplotlib seaborn pyyaml tqdm tensorboard pytest -y
-    pip install "transformers>=4.40" "datasets>=3.0" "tokenizers>=0.19" "accelerate>=0.30" evaluate seqeval pandas
-}
-
-echo "=== Verifying GPU access ==="
-conda activate sterile-lang
-python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}'); print(f'Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')"
+# --- Create virtual environment and install all dependencies ---
+echo "=== Installing dependencies with uv sync ==="
+cd "$(dirname "$0")/.."
+uv sync
 
 echo "=== Setup complete ==="
+echo "To activate the environment manually: source .venv/bin/activate"

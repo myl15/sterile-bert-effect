@@ -6,12 +6,16 @@
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpu              # Adjust for your cluster
+#SBATCH --qos=matrix        # Adjust for your cluster
 # ============================================================================
 # Step 5: MLM pre-training for both control and sterile models.
 # Requires 1 GPU.
 # ============================================================================
 set -euo pipefail
+
+# --- Customize these for your cluster ---
+MODULE_CUDA="cuda/12.4"
+# ----------------------------------------
 
 # --- Initialize the module system ---
 for init_script in /etc/profile.d/modules.sh /etc/profile.d/lmod.sh \
@@ -19,15 +23,10 @@ for init_script in /etc/profile.d/modules.sh /etc/profile.d/lmod.sh \
     [ -f "$init_script" ] && { source "$init_script"; break; }
 done
 
-# --- Customize these for your cluster ---
-MODULE_CONDA="miniconda3"
-MODULE_CUDA="cuda/12.4"
-# ----------------------------------------
-
 module purge
-module load "$MODULE_CONDA"
 module load "$MODULE_CUDA"
-conda activate sterile-lang
+
+source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
 
 cd "$SLURM_SUBMIT_DIR"
 
