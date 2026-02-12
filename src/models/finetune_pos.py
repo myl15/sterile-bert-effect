@@ -141,7 +141,7 @@ def finetune_and_evaluate(variant: str, config: dict):
         metric_for_best_model="eval_accuracy",
         seed=f_cfg["seed"],
         dataloader_num_workers=0,  # Windows compatibility
-        fp16=True,
+        bf16=True,
         report_to="tensorboard",
         logging_dir=str(Path(config["output_dir"]) / "logs" / f"{variant}_pos"),
     )

@@ -1,15 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=sterile-pretrain
-#SBATCH --output=slurm/logs/02_pretrain_%j.out
-#SBATCH --error=slurm/logs/02_pretrain_%j.out
-#SBATCH --time=04:00:00
-#SBATCH --mem=32G
+#SBATCH --job-name=finetune-control
+#SBATCH --output=slurm/logs/03a_finetune_control_%j.out
+#SBATCH --error=slurm/logs/03a_finetune_control_%j.out
+#SBATCH --time=02:00:00
+#SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:1
-#SBATCH --qos=matrix        # Adjust for your cluster
+#SBATCH --qos=matrix
 # ============================================================================
-# Step 5: MLM pre-training for both control and sterile models.
-# Requires 1 GPU.
+# Step 6a: POS fine-tuning + zero-shot eval for the CONTROL model.
 # ============================================================================
 set -euo pipefail
 
@@ -25,9 +24,9 @@ source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
 
 cd "$SLURM_SUBMIT_DIR"
 
-echo "$(date) | Starting MLM pre-training"
+echo "$(date) | Starting POS fine-tuning (control)"
 echo "GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader)"
 
-python src/models/pretrain_mlm.py --config configs/base_config.yaml --variant both
+python src/models/finetune_pos.py --config configs/base_config.yaml --variant control
 
-echo "$(date) | Pre-training complete"
+echo "$(date) | Fine-tuning (control) complete"

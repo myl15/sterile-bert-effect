@@ -10,11 +10,20 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from datasets import load_dataset
 from transformers import (
     BertForTokenClassification,
     PreTrainedTokenizerFast,
 )
+
+
+def load_ud_sentences(conllu_path: str) -> list:
+    """Parse sentence texts from a CoNLL-U file using '# text = ' comments."""
+    sentences = []
+    with open(conllu_path, encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("# text = "):
+                sentences.append(line[len("# text = "):].strip())
+    return sentences
 
 
 def linear_CKA(X: np.ndarray, Y: np.ndarray) -> float:
@@ -89,20 +98,19 @@ def run_cka_analysis(variant: str, config: dict) -> list:
     tokenizer = PreTrainedTokenizerFast.from_pretrained(str(model_dir))
     model = BertForTokenClassification.from_pretrained(str(model_dir))
 
-    # Load UD test sentences
-    en_data = load_dataset(
-        "universal-dependencies/universal_dependencies",
-        f_cfg["en_treebank"], split="test", trust_remote_code=True,
-    )
-    fr_data = load_dataset(
-        "universal-dependencies/universal_dependencies",
-        f_cfg["fr_treebank"], split="test", trust_remote_code=True,
-    )
+    # Load UD test sentences from local CoNLL-U files
+    project_root = Path(__file__).resolve().parent.parent.parent
+    ud_dir = project_root / config.get("ud_dir", "data/ud")
+    en_conllu = ud_dir / f"{f_cfg['en_treebank']}-ud-test.conllu"
+    fr_conllu = ud_dir / f"{f_cfg['fr_treebank']}-ud-test.conllu"
+
+    en_sents = load_ud_sentences(str(en_conllu))
+    fr_sents = load_ud_sentences(str(fr_conllu))
 
     # Take first N sentences from each
-    n = min(500, len(en_data), len(fr_data))
-    en_sents = [en_data[i]["text"] for i in range(n)]
-    fr_sents = [fr_data[i]["text"] for i in range(n)]
+    n = min(500, len(en_sents), len(fr_sents))
+    en_sents = en_sents[:n]
+    fr_sents = fr_sents[:n]
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"  Extracting representations on {device} ({n} sentences each)...")

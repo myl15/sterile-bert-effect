@@ -1,5 +1,6 @@
 # === Paths ===
 data_dir: "data"
+ud_dir: "data/ud"
 output_dir: "outputs"
 
 # === Wikipedia Download ===
@@ -33,13 +34,13 @@ model:
 # === MLM Pre-training ===
 pretrain:
   epochs: 3
-  batch_size: 64
+  batch_size: 256
   learning_rate: 3.0e-5
   warmup_ratio: 0.1
   weight_decay: 0.01
   mlm_probability: 0.15
   max_seq_length: 128
-  fp16: true
+  bf16: true
   gradient_accumulation_steps: 1
   save_steps: 5000
   logging_steps: 500
@@ -48,7 +49,7 @@ pretrain:
 # === POS Fine-tuning ===
 finetune:
   epochs: 10
-  batch_size: 16
+  batch_size: 64
   learning_rate: 5.0e-5
   warmup_ratio: 0.1
   weight_decay: 0.01

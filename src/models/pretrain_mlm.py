@@ -71,7 +71,7 @@ def pretrain(variant: str, config: dict):
         learning_rate=p_cfg["learning_rate"],
         warmup_ratio=p_cfg["warmup_ratio"],
         weight_decay=p_cfg["weight_decay"],
-        fp16=p_cfg["fp16"],
+        bf16=p_cfg["bf16"],
         logging_dir=str(Path(config["output_dir"]) / "logs" / variant),
         logging_steps=p_cfg["logging_steps"],
         save_steps=p_cfg["save_steps"],
